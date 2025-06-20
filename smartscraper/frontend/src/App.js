@@ -46,7 +46,9 @@ export default function App() {
 
       <Filters setVille={setVille} />
 
-      <CardGrid data={filtered} />
+      <div className="card">
+        <CardGrid data={filtered} />
+      </div>
     </div>
   );
 }
