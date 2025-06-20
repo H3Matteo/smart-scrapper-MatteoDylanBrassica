@@ -2,7 +2,7 @@
 FROM python:3.11-slim
 
 # Installer cron et dépendances
-RUN apt-get update && apt-get install -y cron && pip install pandas sqlalchemy requests
+RUN apt-get update && apt-get install -y cron && pip install pandas sqlalchemy pymongo requests
 
 # Copier le backend (où est scraper.py)
 WORKDIR /app
