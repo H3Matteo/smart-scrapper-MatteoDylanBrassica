@@ -1,34 +1,110 @@
-🧠 SmartScraper – Projet de collecte et visualisation de données open data
-🎯 Objectif du projet
-Le projet SmartScraper a pour objectif de développer une application complète permettant de :
+# 🧠 SmartScraper – Collecte et visualisation de données Open Data
 
-Collecter des données publiques via une source open data légale,
+## 🎯 Objectif du projet
 
-Les stocker dans une base relationnelle,
+SmartScraper est une application web fullstack conçue pour :
 
-Les exposer via une API REST avec Flask,
+- Collecter automatiquement des données depuis une source open data légale (CSV ou API),
+- Les insérer dans une base de données relationnelle (SQLite),
+- Les exposer via une API REST construite avec **Flask**,
+- Les afficher de manière dynamique et filtrable avec une interface **React**,
+- Et enfin conteneuriser l’ensemble avec **Docker** et `docker-compose`.
 
-Les afficher dynamiquement dans une interface web React,
+---
 
-Le tout conteneurisé avec Docker.
+## 🧰 Technologies utilisées
 
-📊 Source de données utilisée
-Nom : Musées de France – Base MUSEOFILE
+| Composant         | Stack technique                         |
+|-------------------|------------------------------------------|
+| Backend API       | Python 3 + Flask + SQLAlchemy            |
+| Scraper           | Python (pandas + requests)               |
+| Base de données   | SQLite (fichier local `annonces.db`)     |
+| Frontend Web      | React.js + TailwindCSS                   |
+| Conteneurisation  | Docker + docker-compose                  |
 
-URL : https://www.data.gouv.fr/fr/datasets/musees-de-france-base-museofile/
+---
 
-Fichier exploité : liste-des-musees-de-france.csv
+## 🌐 Source de données utilisée
 
-Nombre d’entrées : ~1200 musées
+**Nom** : Musées de France – Base MUSEOFILE  
+**URL** : https://www.data.gouv.fr/fr/datasets/musees-de-france-base-museofile/  
 
-Champs exploités (exemples) : Nom du musée, Département, Commune, Code INSEE, Coordonnées GPS, URL, etc.
+---
 
-📜 Licence et légalité
-Licence : Licence Ouverte / Open Licence (Etalab)
+## 📜 Licence des données
 
-Citation :
+**Licence Ouverte / Open Licence (Etalab)**
 
-"Les données diffusées sur data.gouv.fr sont librement réutilisables dans les conditions fixées par la Licence Ouverte."
+> "Les données diffusées sur data.gouv.fr sont librement réutilisables dans les conditions fixées par la Licence Ouverte."
 
-Justification de la légalité :
-La base MUSEOFILE est diffusée sur la plateforme officielle data.gouv.fr, et publiée sous une licence ouverte permettant explicitement l’utilisation, la modification et la redistribution des données, y compris par des traitements automatisés comme le scraping ou l’import via API/CSV.
+
+
+## 📁 Arborescence du projet
+
+smart-scrapper-MatteoDylanBrassica/
+smartcraper/
+├── backend/
+│   ├── app.py
+│   ├── db.py
+│   ├── models.py
+│   ├── scraper.py
+│   |── requirements.txt
+│   ├── musees_data.json
+│   |── musees.db
+│   ├── test_scraper.py
+│   
+├── frontend/
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   ├── App.js
+│   │   ├── components/
+│   │   │   ├── CardGrid.js
+│   │   │   ├── DataTable.js
+│   │   │   └── Filters.js
+│   │   └── index.js
+│   └── package.json
+├── docker/
+│   ├── Dockerfile.backend
+│   ├── Dockerfile.frontend
+│   └── docker-compose.yml
+├── musees.db
+├── musees_data.json
+└── README.md
+
+
+
+---
+
+## ⚙️ Procédure d’installation (via Docker)
+
+1. **Se positionner à la racine du projet** :
+   ```bash
+   cd smartscraper
+   cd docker
+   docker-compose up --build
+   ```
+
+# Voici les routes
+
+- API Flask : http://localhost:3000/
+- Frontend React : http://localhost:5000/api/data
+
+- http://localhost:5000/api/data/{Ville}
+- http://localhost:5000//api/data/nom/{nom}.
+
+
+## 🖼️ Aperçu de l'application
+
+### Page d'accueil
+![Accueil](./screenshots/accueil.png)
+
+### Exemple de filtre
+![FiltreVille](./screenshots/filtreVille.png)
+
+![FiltreVille&Nom](./screenshots/filtreVille&Nom.png)
+
+
+👨‍💻 Équipe projet
+Étudiants : Brassica Selvaratnam, Dylan Bouiullon, Matteo Guy
+
