@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: smartscraper-backend
+    volumes:
+      - ./database:/app/database
+    ports:
+      - "5000:5000"
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: smartscraper-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
