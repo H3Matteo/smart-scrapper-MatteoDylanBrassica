@@ -53,7 +53,7 @@ def download_and_clean():
     def clean_annee(x):
         if pd.isna(x):
             return None
-        match = re.search(r"\\b(\d{4})\\b", str(x))
+        match = re.search(r"\b(\d{4})\b", str(x))
         try:
             return int(match.group(1)) if match else None
         except ValueError:
