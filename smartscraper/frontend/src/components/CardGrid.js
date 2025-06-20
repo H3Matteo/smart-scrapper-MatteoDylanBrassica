@@ -8,20 +8,14 @@ export function CardGrid({ data }) {
       {data.map((item, i) => (
         <div key={i} className="bg-white shadow-md rounded-lg p-4">
           <h2 className="text-xl font-semibold text-blue-700 mb-2">{item.nom}</h2>
-          <p className="text-gray-700 text-sm mb-1"><strong>Adresse:</strong> {item.adresse}</p>
           <p className="text-gray-700 text-sm mb-1"><strong>Ville:</strong> {item.ville}</p>
-          {item.site_web && (
-            <a
-              href={item.site_web}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-2 text-sm text-blue-500 underline"
-            >
-              Voir le site
-            </a>
-          )}
+          <p className="text-gray-700 text-sm mb-1"><strong>Département:</strong> {item.departement}</p>
+          <p className="text-gray-700 text-sm mb-1"><strong>Région:</strong> {item.region}</p>
+          <p className="text-gray-700 text-sm mb-1"><strong>Thème:</strong> {item.theme}</p>
+          <p className="text-gray-700 text-sm mb-1"><strong>Année:</strong> {item.annee || 'Inconnue'}</p>
         </div>
       ))}
     </div>
   );
 }
+    
