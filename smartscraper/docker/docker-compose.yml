@@ -22,5 +22,11 @@ services:
     ports:
       - "3000:80"
 
+  cron:
+    build:
+      context: ../..
+      dockerfile: smartscraper/docker/Dockerfile.cron
+    container_name: smart_cron
+
 volumes:
   dbdata:

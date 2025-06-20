@@ -1,0 +1,18 @@
+# Dockerfile.cron
+FROM python:3.11-slim
+
+# Installer cron et dépendances
+RUN apt-get update && apt-get install -y cron && pip install pandas sqlalchemy requests
+
+# Copier le backend (où est scraper.py)
+WORKDIR /app
+COPY ../ /app
+
+# Définir le cron job avec chemin absolu vers python3
+RUN echo "*/1 * * * * /usr/local/bin/python3 /app/smartscraper/backend/scraper.py >> /app/smartscraper/backend/cron.log 2>&1" > /etc/cron.d/scraper-cron
+
+# Appliquer les droits et activer
+RUN chmod 0644 /etc/cron.d/scraper-cron && crontab /etc/cron.d/scraper-cron
+
+# Lancer cron en foreground
+CMD ["cron", "-f"]
