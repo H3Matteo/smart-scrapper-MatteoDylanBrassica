@@ -15,8 +15,8 @@ def download_and_clean():
     ]
     df = df[keep_columns].dropna(subset=["Identifiant", "Nom_officiel"])
 
-    # Séparation latitude / longitude
-    coords = df["Coordonnees"].str.extract(r"\(([^,]+),\s*([^)]+)\)")
+    # Séparation latitude / longitude (corrigée)
+    coords = df["Coordonnees"].str.extract(r"^\s*([^,]+)\s*,\s*([^,]+)\s*$")
     df["Latitude"] = coords[0]
     df["Longitude"] = coords[1]
 
