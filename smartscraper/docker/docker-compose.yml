@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: smartscraper-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../musees.db:/app/musees.db
+    working_dir: /app
+    environment:
+      - FLASK_ENV=development
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: smartscraper-frontend
+    ports:
+      - "3000:80"
