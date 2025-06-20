@@ -3,6 +3,7 @@ import json
 import re
 from sqlalchemy import create_engine, Column, String, Integer, Float
 from sqlalchemy.orm import declarative_base, sessionmaker
+from pymongo import MongoClient
 
 CSV_URL = "https://www.data.gouv.fr/fr/datasets/r/5ccd6238-4fb0-4b2c-b14a-581909489320"
 OUTPUT_JSON = "musees_data.json"
@@ -94,5 +95,18 @@ def download_and_clean():
     session.commit()
     print("[✅] Insertion terminée dans la base SQLite")
 
+
+def insert_into_mongodb():
+    client = MongoClient("mongodb://root:example@mongodb:27017/")
+    db = client["smartdb"]
+    collection = db["musees"]
+
+    with open("musees_data.json", encoding="utf-8") as f:
+        data = json.load(f)
+        collection.delete_many({})  # Nettoyage pour éviter les doublons
+        collection.insert_many(data)
+        print("[✅] Données insérées dans MongoDB")
+
 if __name__ == "__main__":
     download_and_clean()
+    insert_into_mongodb()

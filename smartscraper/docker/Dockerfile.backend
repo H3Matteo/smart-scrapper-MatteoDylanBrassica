@@ -5,7 +5,8 @@ WORKDIR /app
 
 COPY ../backend /app
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Ajout de pymongo pour MongoDB
+RUN pip install --no-cache-dir -r requirements.txt pymongo
 
 EXPOSE 5000
 
