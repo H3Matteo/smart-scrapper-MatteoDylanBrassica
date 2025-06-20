@@ -1,0 +1,6 @@
+# Fichiers générés
+musees.db
+musees_data.json
+__pycache__/
+*.pyc
+.env

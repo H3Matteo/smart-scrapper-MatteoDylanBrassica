@@ -53,7 +53,11 @@ def download_and_clean():
     def clean_annee(x):
         if pd.isna(x):
             return None
+<<<<<<< HEAD
+        match = re.search(r"\\b(\d{4})\\b", str(x))
+=======
         match = re.search(r"\b(\d{4})\b", str(x))
+>>>>>>> ccc64942fc03a09cb58851ceda49ee38a56ff19d
         try:
             return int(match.group(1)) if match else None
         except ValueError:
