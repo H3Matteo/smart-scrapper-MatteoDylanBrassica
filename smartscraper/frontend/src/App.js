@@ -8,7 +8,6 @@ export default function App() {
   const [ville, setVille] = useState("");
   const [nom, setNom] = useState("");
   const [theme, setTheme] = useState("");
-  const [themes, setThemes] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/data")
@@ -16,38 +15,32 @@ export default function App() {
       .then((result) => {
         setData(result);
         setFiltered(result);
-        const allThemes = result.flatMap(m => m.theme ? m.theme.split(",") : []);
-        const uniqueThemes = [...new Set(allThemes.map(t => t.trim()))];
-        setThemes(uniqueThemes);
       });
   }, []);
 
   useEffect(() => {
-    if (ville !== "") {
-      fetch(`http://localhost:5000/api/data/${ville}`)
-        .then((res) => res.json())
-        .then((res) => setFiltered(res));
-    } else if (nom !== "") {
-      fetch(`http://localhost:5000/api/data/nom/${nom}`)
-        .then((res) => res.json())
-        .then((res) => setFiltered(res));
-    } else {
-      setFiltered(data);
-    }
-  }, [ville, nom, data]);
+    let result = [...data];
 
-  useEffect(() => {
-    if (theme === "") {
-      setFiltered(data);
-      return;
+    if (ville.trim() !== "") {
+      result = result.filter((item) =>
+        item.ville?.toLowerCase().includes(ville.toLowerCase())
+      );
     }
 
-    const filteredByTheme = data.filter((item) => {
-      return item.theme && item.theme.toLowerCase().includes(theme.toLowerCase());
-    });
+    if (nom.trim() !== "") {
+      result = result.filter((item) =>
+        item.nom?.toLowerCase().includes(nom.toLowerCase())
+      );
+    }
 
-    setFiltered(filteredByTheme);
-  }, [theme, data]);
+    if (theme.trim() !== "") {
+      result = result.filter((item) =>
+        item.theme?.toLowerCase().includes(theme.toLowerCase())
+      );
+    }
+
+    setFiltered(result);
+  }, [ville, nom, theme, data]);
 
   const handleScrape = () => {
     fetch("http://localhost:5000/api/scrape", { method: "POST" })
@@ -66,7 +59,7 @@ export default function App() {
         </button>
       </header>
 
-      <Filters setVille={setVille} setNom={setNom} setTheme={setTheme} themes={themes} />
+      <Filters setVille={setVille} setNom={setNom} setTheme={setTheme} data={data} />
 
       <div className="card">
         <CardGrid data={filtered} />
