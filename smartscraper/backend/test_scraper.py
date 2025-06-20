@@ -1,95 +1,47 @@
+import unittest
 import pandas as pd
+from scraper import download_and_clean, OUTPUT_JSON
 import json
-import re
-from sqlalchemy import create_engine, Column, String, Integer, Float
-from sqlalchemy.orm import declarative_base, sessionmaker
+import os
 
-CSV_URL = "https://www.data.gouv.fr/fr/datasets/r/5ccd6238-4fb0-4b2c-b14a-581909489320"
-OUTPUT_JSON = "musees_data.json"
-DB_URL = "sqlite:///musees.db"
+class TestScraper(unittest.TestCase):
 
-Base = declarative_base()
+    def setUp(self):
+        # Exécute le scraping une fois pour tester les données générées
+        download_and_clean()
 
-class Musee(Base):
-    __tablename__ = "musees"
-    id = Column(String, primary_key=True)
-    nom = Column(String)
-    ville = Column(String)
-    departement = Column(String)
-    region = Column(String)
-    theme = Column(String)
-    annee = Column(Integer, nullable=True)
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
+        # Charge le JSON généré
+        with open(OUTPUT_JSON, "r", encoding="utf-8") as f:
+            self.data = json.load(f)
 
-def download_and_clean():
-    print("[INFO] Téléchargement des données des musées...")
-    df = pd.read_csv(CSV_URL, sep=";")
+    def test_json_exists(self):
+        """Le fichier JSON a bien été créé"""
+        self.assertTrue(os.path.exists(OUTPUT_JSON))
 
-    # Sélection des colonnes utiles
-    keep_columns = [
-        "Identifiant", "Nom_officiel", "Ville", "Departement",
-        "Région", "Domaine_thematique", "Annee_creation", "Coordonnees"
-    ]
-    df = df[keep_columns].dropna(subset=["Identifiant", "Nom_officiel"])
+    def test_data_not_empty(self):
+        """Les données ne sont pas vides"""
+        self.assertGreater(len(self.data), 0)
 
-    # Séparation latitude / longitude (corrigée)
-    coords = df["Coordonnees"].str.extract(r"^\s*([^,]+)\s*,\s*([^,]+)\s*$")
-    df["Latitude"] = pd.to_numeric(coords[0], errors="coerce")
-    df["Longitude"] = pd.to_numeric(coords[1], errors="coerce")
+    def test_required_fields_exist(self):
+        """Chaque musée possède les champs requis"""
+        required_fields = {"id", "nom", "ville", "departement", "region", "theme", "annee", "Latitude", "Longitude"}
+        for musee in self.data:
+            self.assertTrue(required_fields.issubset(musee.keys()))
 
-    df = df.rename(columns={
-        "Identifiant": "id",
-        "Nom_officiel": "nom",
-        "Ville": "ville",
-        "Departement": "departement",
-        "Région": "region",
-        "Domaine_thematique": "theme",
-        "Annee_creation": "annee"
-    })
-    df = df.drop(columns=["Coordonnees"])
+    def test_annee_format(self):
+        """L’année doit être un entier ou None"""
+        for musee in self.data:
+            self.assertTrue(isinstance(musee["annee"], int) or musee["annee"] is None)
 
-    # Nettoyage des types pour JSON aussi
-    def clean_annee(x):
-        if pd.isna(x):
-            return None
-        match = re.search(r"\b(\d{4})\b", str(x))
-        return int(match.group(1)) if match else None
-
-    df["annee"] = df["annee"].apply(clean_annee)
-
-    print(f"[OK] {len(df)} musées traités")
-
-    # Export JSON
-    records = df.to_dict(orient="records")
-    with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
-        json.dump(records, f, ensure_ascii=False, indent=2)
-
-    print(f"[✅] Données sauvegardées dans {OUTPUT_JSON}")
-
-    # Persistance en base
-    print("[INFO] Insertion en base SQLite...")
-    engine = create_engine(DB_URL)
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    for r in records:
-        musee = Musee(
-            id=r["id"],
-            nom=r["nom"],
-            ville=r["ville"],
-            departement=r["departement"],
-            region=r["region"],
-            theme=r["theme"],
-            annee=r["annee"],
-            latitude=r["Latitude"] if pd.notna(r["Latitude"]) else None,
-            longitude=r["Longitude"] if pd.notna(r["Longitude"]) else None
-        )
-        session.merge(musee)
-
-    session.commit()
-    print("[✅] Insertion terminée dans la base SQLite")
+    def test_coordinates_format(self):
+        """Latitude et longitude doivent être des floats ou None"""
+        for musee in self.data:
+            lat = musee["Latitude"]
+            lon = musee["Longitude"]
+            if lat is not None:
+                self.assertIsInstance(lat, float)
+            if lon is not None:
+                self.assertIsInstance(lon, float)
 
 if __name__ == "__main__":
-    download_and_clean()
+    unittest.main()

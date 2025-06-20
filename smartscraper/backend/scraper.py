@@ -2,8 +2,7 @@ import pandas as pd
 import json
 import re
 from sqlalchemy import create_engine, Column, String, Integer, Float
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 CSV_URL = "https://www.data.gouv.fr/fr/datasets/r/5ccd6238-4fb0-4b2c-b14a-581909489320"
 OUTPUT_JSON = "musees_data.json"
@@ -36,8 +35,8 @@ def download_and_clean():
 
     # Séparation latitude / longitude (corrigée)
     coords = df["Coordonnees"].str.extract(r"^\s*([^,]+)\s*,\s*([^,]+)\s*$")
-    df["Latitude"] = coords[0]
-    df["Longitude"] = coords[1]
+    df["Latitude"] = pd.to_numeric(coords[0], errors="coerce")
+    df["Longitude"] = pd.to_numeric(coords[1], errors="coerce")
 
     df = df.rename(columns={
         "Identifiant": "id",
@@ -51,11 +50,16 @@ def download_and_clean():
     df = df.drop(columns=["Coordonnees"])
 
     # Nettoyage des types pour JSON aussi
-    df["annee"] = df["annee"].apply(
-        lambda x: int(re.search(r"\d{4}", str(x)).group()) if pd.notna(x) and re.search(r"\d{4}", str(x)) else None
-    )
-    df["Latitude"] = pd.to_numeric(df["Latitude"], errors="coerce")
-    df["Longitude"] = pd.to_numeric(df["Longitude"], errors="coerce")
+    def clean_annee(x):
+        if pd.isna(x):
+            return None
+        match = re.search(r"\\b(\d{4})\\b", str(x))
+        try:
+            return int(match.group(1)) if match else None
+        except ValueError:
+            return None
+
+    df["annee"] = df["annee"].apply(clean_annee)
 
     print(f"[OK] {len(df)} musées traités")
 
@@ -82,8 +86,8 @@ def download_and_clean():
             region=r["region"],
             theme=r["theme"],
             annee=r["annee"],
-            latitude=r["Latitude"] if pd.notna(r["Latitude"]) else None,
-            longitude=r["Longitude"] if pd.notna(r["Longitude"]) else None
+            latitude=float(r["Latitude"]) if pd.notna(r["Latitude"]) else None,
+            longitude=float(r["Longitude"]) if pd.notna(r["Longitude"]) else None
         )
         session.merge(musee)
 
